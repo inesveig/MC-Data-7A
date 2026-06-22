@@ -1,0 +1,9 @@
+{
+  "image_quality": "good | limited | poor",
+  "predicted_class": "normal | suspected_opacity | uncertain",
+  "confidence": 0.0,
+  "visual_evidence": ["observation factuelle courte sur les signes visuels observés"],
+  "justification": "Raisonnement clinique bref reliant les signes à la classe prédite (2-4 phrases, fondé uniquement sur les éléments visibles).",
+  "limitations": ["facteur limitant identifié : qualité, artefact, incertitude, manque de contexte"],
+  "warning": "Prototype pédagogique uniquement. Résultat expérimental non validé cliniquement. Ne pas utiliser pour diagnostiquer, trier ou orienter un patient. Toute sortie doit être vérifiée par un professionnel qualifié."
+}
