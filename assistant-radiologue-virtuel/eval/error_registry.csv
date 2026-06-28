@@ -1,2 +1,0 @@
-case_id,image_name,ground_truth,predicted_class,confidence,error_type,comment,corrective_action
-C0001,,,,,"","À remplir après analyse S6","enrichir les données / ajuster le seuil / renforcer le prompt"

@@ -23,3 +23,19 @@ data/rsna/
 *.dcm
 *.zip
 kaggle.json
+
+# --- Plateforme web (frontend React / backend Django / service ai) ---
+node_modules/
+frontend/dist/
+frontend/.vite/
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
+
+# Modèles / poids IA lourds téléchargés localement
+ai/models/
+*.safetensors
+
+# Garde les exemples d'environnement, ignore les vrais .env
+*.env
+!*.env.example

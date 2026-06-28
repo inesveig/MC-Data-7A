@@ -81,8 +81,38 @@ assistant-radiologue-virtuel/
 ├── eval/          # évaluation, sorties CSV/JSON, registre d'erreurs
 ├── tests/         # smoke tests et contrat minimal
 ├── notebooks/     # notebooks de démarrage
-└── finetuning/    # stubs expérimentaux, non obligatoires
+├── finetuning/    # stubs expérimentaux, non obligatoires
+│
+│   # --- Couche plateforme web (extension, ne fait pas partie du contrat noté) ---
+├── ai/            # service FastAPI MedGemma (upload → analyse cercle + gravité)
+├── backend/       # API Django + DRF (auth JWT, historique des analyses)
+└── frontend/      # interface React + TypeScript (landing, login, plateforme)
 ```
+
+## Plateforme web (extension)
+
+Au-dessus du prototype pédagogique, une plateforme web permet de **téléverser une
+radio**, de la faire analyser par MedGemma et d'afficher la **zone d'anomalie
+cerclée**, sa **gravité (0–10)** et une explication. Trois services indépendants :
+
+| Dossier | Stack | Rôle |
+|---|---|---|
+| `ai/` | FastAPI + MedGemma (`google/medgemma-4b-it`) | `POST /analyze` : DICOM/PNG → JSON (anomalie, région, cercle normalisé, gravité, explication). `AI_MOCK=1` pour développer sans le modèle. |
+| `backend/` | Django + DRF (JWT) | Authentification, historique des analyses, proxy vers le service IA. |
+| `frontend/` | React + TypeScript (Vite) | Landing page, login, plateforme d'upload avec overlay SVG du cercle. |
+
+Flux : `frontend → backend Django /api/analyses/analyze/ → ai /analyze → MedGemma`.
+
+```bash
+# 1. service IA          2. backend Django           3. frontend
+cd ai && uvicorn main:app --port 8001
+cd backend && python manage.py migrate && python manage.py runserver 8000
+cd frontend && npm install && npm run dev   # http://localhost:5173
+```
+
+> Cette couche réutilise la logique MedGemma déjà présente dans `src/` et reste,
+> comme le reste du dépôt, **un prototype non clinique**. La localisation par
+> cercle est **approximative** (MedGemma est un VLM, pas un détecteur).
 
 ## Livrables attendus
 
