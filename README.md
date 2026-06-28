@@ -14,7 +14,7 @@ Prototype pédagogique d'IA médicale multimodale pour apprendre à construire u
 >  **Position non clinique.** Ce dépôt n'est pas un dispositif médical. Il ne doit jamais être utilisé pour diagnostiquer, trier ou orienter un patient. Toute sortie doit rester un résultat expérimental, vérifié par un professionnel qualifié.
 
 ---
-f
+
 ## Contrat du projet
 
 | Élément | Cadrage |
