@@ -98,17 +98,35 @@ cerclée**, sa **gravité (0–10)** et une explication. Trois services indépen
 | Dossier | Stack | Rôle |
 |---|---|---|
 | `ai/` | FastAPI + MedGemma (`google/medgemma-4b-it`) | `POST /analyze` : DICOM/PNG → JSON (anomalie, région, cercle normalisé, gravité, explication). `AI_MOCK=1` pour développer sans le modèle. |
-| `backend/` | Django + DRF (JWT) | Authentification, historique des analyses, proxy vers le service IA. |
-| `frontend/` | React + TypeScript (Vite) | Landing page, login, plateforme d'upload avec overlay SVG du cercle. |
+| `backend/` | Django + DRF (JWT) | Source de vérité unique : auth, diagnostic 3 classes dérivé, historique, avis médecin, KPI, proxy vers le service IA. |
+| `frontend/streamlit-app/` | Streamlit | Login, upload, résultat (cercle d'anomalie), historique, avis médecin, KPI — consomme **uniquement** l'API Django. |
 
-Flux : `frontend → backend Django /api/analyses/analyze/ → ai /analyze → MedGemma`.
+Flux : `Streamlit → backend Django /api/analyses/analyze/ (JWT) → ai /analyze → MedGemma`.
+Stockage : tout est persisté dans la base Django (`backend/db.sqlite3`), y compris
+le PNG normalisé des radios (servi via `/media/`). Il n'y a plus de base locale
+côté front.
+
+Chaque service a son propre venv et son `requirements.txt`.
 
 ```bash
-# 1. service IA          2. backend Django           3. frontend
-cd ai && uvicorn main:app --port 8001
-cd backend && python manage.py migrate && python manage.py runserver 8000
-cd frontend && npm install && npm run dev   # http://localhost:5173
+# 1. service IA (mock par défaut, AI_MOCK=1)
+cd ai && python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && cp .env.example .env
+uvicorn main:app --port 8001
+
+# 2. backend Django (port 8000)
+cd backend && python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && cp .env.example .env
+python manage.py migrate && python manage.py runserver 8000
+
+# 3. front Streamlit (port 8501)
+cd frontend/streamlit-app && python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py   # http://localhost:8501
 ```
+
+Le service IA mappe sa sortie riche (anomalie, gravité 0–10) vers les 3 classes
+**Sain / Malade / Incertain** côté Django (`backend/analyses/mapping.py`).
 
 > Cette couche réutilise la logique MedGemma déjà présente dans `src/` et reste,
 > comme le reste du dépôt, **un prototype non clinique**. La localisation par

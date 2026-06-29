@@ -1,46 +1,60 @@
+"""Helpers UI : export CSV et overlay du cercle d'anomalie.
+
+Les données viennent désormais de l'API Django (dictionnaires JSON), plus de
+la base SQLite locale. La concordance IA/médecin est calculée côté serveur.
+"""
 import csv
 import io
 
-
-def compute_concordance(ia_diagnosis, doctor_diagnosis):
-    if not doctor_diagnosis:
-        return None, None
-
-    doctor_category = "Sain" if doctor_diagnosis == "Sain" else "Malade"
-
-    if ia_diagnosis == "Incertain":
-        return "Non comparable (IA incertaine)", 50
-
-    if ia_diagnosis == doctor_category:
-        return "Concordant", 100
-
-    return "Discordant", 0
+from PIL import Image, ImageDraw
 
 
-def export_diagnostics_to_csv(rows):
-
+def export_diagnostics_to_csv(rows: list[dict]) -> str:
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow([
         "ID", "Nom de l'analyse", "Fichier original", "Diagnostic IA",
-        "Confiance (%)", "Date", "Avis médecin", "Notes médecin", "Concordance",
+        "Confiance (%)", "Gravité", "Région", "Date",
+        "Avis médecin", "Notes médecin", "Concordance",
     ])
 
     for row in rows:
-        display_name = row["analysis_name"] if row["analysis_name"] else row["filename"]
-        statut, _ = compute_concordance(row["diagnosis"], row["doctor_diagnosis"])
-        confidence = row["confidence"]
-
+        display_name = row.get("analysis_name") or row.get("filename", "")
+        confidence = row.get("confidence")
+        created = (row.get("created_at") or "")[:19].replace("T", " ")
         writer.writerow([
-            row["id"],
+            row.get("id"),
             display_name,
-            row["filename"],
-            row["diagnosis"],
+            row.get("filename", ""),
+            row.get("diagnosis", ""),
             f"{confidence * 100:.1f}" if confidence is not None else "",
-            row["created_at"][:19].replace("T", " "),
-            row["doctor_diagnosis"] or "",
-            row["doctor_notes"] or "",
-            statut or "",
-            ])
+            row.get("severity", ""),
+            row.get("region") or "",
+            created,
+            row.get("doctor_diagnosis") or "",
+            row.get("doctor_notes") or "",
+            row.get("concordance_status") or "",
+        ])
 
     return output.getvalue()
+
+
+def draw_circle(img: Image.Image, circle: dict | None) -> Image.Image:
+    """Dessine le cercle d'anomalie (coords en fractions 0-1) sur l'image."""
+    if not circle:
+        return img
+    try:
+        cx, cy, r = float(circle["cx"]), float(circle["cy"]), float(circle["r"])
+    except (KeyError, TypeError, ValueError):
+        return img
+
+    out = img.convert("RGB").copy()
+    draw = ImageDraw.Draw(out)
+    w, h = out.size
+    # Rayon en pixels : moyenne largeur/hauteur pour rester rond.
+    rp = r * (w + h) / 2
+    x0, y0 = cx * w - rp, cy * h - rp
+    x1, y1 = cx * w + rp, cy * h + rp
+    thickness = max(2, int(min(w, h) * 0.006))
+    draw.ellipse([x0, y0, x1, y1], outline=(255, 60, 60), width=thickness)
+    return out
