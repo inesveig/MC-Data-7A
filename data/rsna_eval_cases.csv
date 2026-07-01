@@ -1,0 +1,25 @@
+case_id,image_path,source,label,split,quality,notes
+d92fc569-fe84-49e4-bfc0-b35891d0e7a7,data/rsna/stage_2_train_images/d92fc569-fe84-49e4-bfc0-b35891d0e7a7.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",uncertain,train,ok,n_boxes=0
+fc15525b-c4e0-4673-af74-955525e1b99a,data/rsna/stage_2_train_images/fc15525b-c4e0-4673-af74-955525e1b99a.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",uncertain,train,ok,n_boxes=0
+c7024796-39ed-4eda-906d-65a1fb5d5c52,data/rsna/stage_2_train_images/c7024796-39ed-4eda-906d-65a1fb5d5c52.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",suspected_opacity,train,ok,n_boxes=1
+bcab0525-079e-492e-8e20-c51c779884aa,data/rsna/stage_2_train_images/bcab0525-079e-492e-8e20-c51c779884aa.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",suspected_opacity,train,ok,n_boxes=2
+d561ede1-9992-4d20-a935-53a32a8c05d1,data/rsna/stage_2_train_images/d561ede1-9992-4d20-a935-53a32a8c05d1.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",suspected_opacity,val,ok,n_boxes=1
+63a3624b-b2be-4681-87fb-e545315a4a0f,data/rsna/stage_2_train_images/63a3624b-b2be-4681-87fb-e545315a4a0f.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",uncertain,train,ok,n_boxes=0
+d11f1b9d-5015-4e99-bb94-c714de18b765,data/rsna/stage_2_train_images/d11f1b9d-5015-4e99-bb94-c714de18b765.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",normal,train,ok,n_boxes=0
+e1bcfa18-5fed-4a92-85fb-14438a17719b,data/rsna/stage_2_train_images/e1bcfa18-5fed-4a92-85fb-14438a17719b.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",normal,train,ok,n_boxes=0
+cfe768fc-4a0c-41fb-b3e3-86229e2cb94a,data/rsna/stage_2_train_images/cfe768fc-4a0c-41fb-b3e3-86229e2cb94a.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",suspected_opacity,train,ok,n_boxes=1
+f888c6c9-2c96-484d-b16f-bd7495288635,data/rsna/stage_2_train_images/f888c6c9-2c96-484d-b16f-bd7495288635.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",uncertain,train,ok,n_boxes=0
+d9a51572-0117-427c-ade2-331f6bd68721,data/rsna/stage_2_train_images/d9a51572-0117-427c-ade2-331f6bd68721.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",uncertain,train,ok,n_boxes=0
+b678dfde-85c1-464f-936f-de965a7f5fe9,data/rsna/stage_2_train_images/b678dfde-85c1-464f-936f-de965a7f5fe9.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",normal,train,ok,n_boxes=0
+bbe95fb0-eb81-478e-b446-1053b0ae0f1b,data/rsna/stage_2_train_images/bbe95fb0-eb81-478e-b446-1053b0ae0f1b.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",uncertain,train,ok,n_boxes=0
+a0923c73-57fa-4fcf-8284-5c77abafb036,data/rsna/stage_2_train_images/a0923c73-57fa-4fcf-8284-5c77abafb036.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",uncertain,train,ok,n_boxes=0
+50691612-2d64-4d61-8d67-bba6836392ce,data/rsna/stage_2_train_images/50691612-2d64-4d61-8d67-bba6836392ce.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",uncertain,train,ok,n_boxes=0
+03d92597-3e33-4fdf-8db5-a27cf5b8d3eb,data/rsna/stage_2_train_images/03d92597-3e33-4fdf-8db5-a27cf5b8d3eb.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",suspected_opacity,train,ok,n_boxes=1
+3f2b878e-9e3b-410b-a739-b43d81b98692,data/rsna/stage_2_train_images/3f2b878e-9e3b-410b-a739-b43d81b98692.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",suspected_opacity,val,ok,n_boxes=2
+e6957865-bb93-4b28-83c4-80e8a7eea793,data/rsna/stage_2_train_images/e6957865-bb93-4b28-83c4-80e8a7eea793.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",normal,train,ok,n_boxes=0
+46cfe8ef-549c-4b26-95b9-3a0b2cea22d5,data/rsna/stage_2_train_images/46cfe8ef-549c-4b26-95b9-3a0b2cea22d5.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",normal,train,ok,n_boxes=0
+62e7f210-65e0-40e1-ba52-8c21b6e767e9,data/rsna/stage_2_train_images/62e7f210-65e0-40e1-ba52-8c21b6e767e9.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",suspected_opacity,train,ok,n_boxes=2
+f1c18d3e-a250-451d-8ed6-47b85a28bfd3,data/rsna/stage_2_train_images/f1c18d3e-a250-451d-8ed6-47b85a28bfd3.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",suspected_opacity,train,ok,n_boxes=2
+12657240-8b00-4be5-994e-6bba758e168a,data/rsna/stage_2_train_images/12657240-8b00-4be5-994e-6bba758e168a.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",normal,train,ok,n_boxes=0
+bc83e722-804e-498f-9efb-7bc329a1327f,data/rsna/stage_2_train_images/bc83e722-804e-498f-9efb-7bc329a1327f.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",normal,train,ok,n_boxes=0
+3c6afc4b-f292-4064-ae8b-06d3439d1d27,data/rsna/stage_2_train_images/3c6afc4b-f292-4064-ae8b-06d3439d1d27.dcm,"RSNA Pneumonia Detection Challenge (Kaggle, 2018)",normal,val,ok,n_boxes=0

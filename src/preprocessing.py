@@ -1,22 +1,61 @@
 from __future__ import annotations
 
 from pathlib import Path
+
+import numpy as np
 from PIL import Image
 
 ALLOWED_SUFFIXES = {".png", ".jpg", ".jpeg", ".bmp"}
+DICOM_SUFFIXES = {".dcm", ".dicom"}
+
+
+def _dicom_to_image(path: Path) -> Image.Image:
+    """Décode un DICOM (ex: RSNA) en image RGB 8 bits.
+
+    Gère la VOI LUT (fenêtrage radiologique) et l'inversion MONOCHROME1,
+    sans quoi les radios RSNA ressortiraient en négatif / mal contrastées.
+    """
+    import pydicom
+
+    try:
+        from pydicom.pixels import apply_voi_lut
+    except ImportError:  # pydicom < 3.0
+        from pydicom.pixel_data_handlers.util import apply_voi_lut
+
+    ds = pydicom.dcmread(str(path))
+    pixels = ds.pixel_array
+
+    try:
+        pixels = apply_voi_lut(pixels, ds)
+    except Exception:
+        pass
+
+    if str(getattr(ds, "PhotometricInterpretation", "")) == "MONOCHROME1":
+        pixels = pixels.max() - pixels
+
+    arr = pixels.astype(np.float32)
+    lo, hi = float(arr.min()), float(arr.max())
+    if hi <= lo:
+        img8 = np.zeros_like(arr, dtype=np.uint8)
+    else:
+        img8 = ((arr - lo) / (hi - lo) * 255.0).clip(0, 255).astype(np.uint8)
+    return Image.fromarray(img8).convert("RGB")
 
 
 def load_image(path: str | Path, size: tuple[int, int] = (512, 512)) -> Image.Image:
     """Load an image safely for the educational prototype.
 
-    This function intentionally keeps preprocessing minimal. For real CXR work,
-    DICOM metadata, windowing, projection and acquisition details should be handled
-    explicitly and documented.
+    Supporte les images bitmap classiques (PNG/JPG/BMP) ainsi que le DICOM
+    (ex: RSNA Pneumonia Detection Challenge), avec fenêtrage VOI LUT.
     """
     path = Path(path)
-    if path.suffix.lower() not in ALLOWED_SUFFIXES:
+    suffix = path.suffix.lower()
+    if suffix in DICOM_SUFFIXES:
+        img = _dicom_to_image(path)
+    elif suffix in ALLOWED_SUFFIXES:
+        img = Image.open(path).convert("RGB")
+    else:
         raise ValueError(f"Unsupported image format: {path.suffix}")
-    img = Image.open(path).convert("RGB")
     return img.resize(size)
 
 
