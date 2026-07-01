@@ -340,8 +340,15 @@ with tab_avis:
                 else:
                     notes_final = notes
 
+                # "Autre" n'est qu'un choix de saisie : le diagnostic stocké
+                # doit être la pathologie précisée par le médecin, pas le
+                # littéral "Autre", sinon l'info est perdue en base.
+                diagnosis_final = (
+                    precision.strip() if doctor_diagnosis == "Autre" and precision.strip() else doctor_diagnosis
+                )
+
                 if st.button("💾 Enregistrer l'avis médical", type="primary"):
-                    ok, res = api.set_doctor_opinion(TOKEN, selected_id, doctor_diagnosis, notes_final)
+                    ok, res = api.set_doctor_opinion(TOKEN, selected_id, diagnosis_final, notes_final)
                     if ok:
                         _load_history.clear()
                         st.success("Avis médical enregistré ! Retrouve la comparaison dans l'Historique.")

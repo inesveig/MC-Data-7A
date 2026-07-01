@@ -6,29 +6,35 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .serializers import RegisterSerializer
+
+
+def _first_error(errors: dict) -> str:
+    for messages in errors.values():
+        if messages:
+            return str(messages[0])
+    return "Champs invalides."
+
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request: Request):
         username = (request.data.get("username") or "").strip()
-        password = request.data.get("password") or ""
-        email = (request.data.get("email") or "").strip()
-
-        if not username or not password:
-            return Response(
-                {"detail": "username et password sont requis."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if User.objects.filter(username=username).exists():
+        if username and User.objects.filter(username=username).exists():
             return Response(
                 {"detail": "Cet utilisateur existe déjà."},
                 status=status.HTTP_409_CONFLICT,
             )
 
-        user = User.objects.create_user(
-            username=username, password=password, email=email
-        )
+        serializer = RegisterSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {"detail": _first_error(serializer.errors)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = serializer.save()
         return Response(
             {"id": user.id, "username": user.username, "email": user.email},
             status=status.HTTP_201_CREATED,

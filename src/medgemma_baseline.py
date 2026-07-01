@@ -110,7 +110,7 @@ def _normalize(parsed: dict[str, Any] | None, raw_text: str) -> dict[str, Any]:
     out: dict[str, Any] = dict(parsed)
 
     cls = str(out.get("predicted_class", "")).strip().lower()
-    out["predicted_class"] = cls if cls in ALLOWED_CLASSES else cls  # validé en aval
+    out["predicted_class"] = cls if cls in ALLOWED_CLASSES else "uncertain"
 
     try:
         conf = float(out.get("confidence", 0.5))

@@ -92,9 +92,15 @@ def _to_analysis(raw: dict) -> Analysis:
     severity = max(0, min(10, severity))
     label = raw.get("severity_label") or _severity_label(severity)
 
+    findings = raw.get("findings") or []
+    if isinstance(findings, str):
+        # Le modèle répond parfois par une phrase brute au lieu d'une liste :
+        # sans ce garde-fou, itérer sur une str la découpe caractère par caractère.
+        findings = [findings]
+
     return Analysis(
         anomaly_present=bool(raw.get("anomaly_present", circle is not None)),
-        findings=[str(f) for f in (raw.get("findings") or [])],
+        findings=[str(f) for f in findings],
         region=raw.get("region"),
         circle=circle,
         severity=severity,

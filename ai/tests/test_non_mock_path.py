@@ -90,6 +90,18 @@ def test_non_mock_transmet_bien_image_et_system_prompt(force_real_path):
     assert "image" in user_types and "text" in user_types
 
 
+def test_non_mock_findings_en_string_devient_liste_dun_element(force_real_path):
+    # Observé en usage réel : MedGemma renvoie parfois `findings` comme une
+    # phrase brute au lieu d'une liste. Sans garde-fou, itérer la str la
+    # découpe caractère par caractère (voir ai/medgemma.py::_to_analysis).
+    force_real_path(
+        '{"anomaly_present": true, "findings": "Opacité du lobe droit.", '
+        '"severity": 3}'
+    )
+    analysis = medgemma.analyze_image(Image.new("RGB", (16, 16)))
+    assert analysis.findings == ["Opacité du lobe droit."]
+
+
 def test_non_mock_json_dans_fence_markdown(force_real_path):
     force_real_path('Voici:\n```json\n{"anomaly_present": true, "severity": 9}\n```')
     analysis = medgemma.analyze_image(Image.new("RGB", (16, 16)))
