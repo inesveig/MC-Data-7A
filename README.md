@@ -72,7 +72,7 @@ La réponse doit contenir une classe, une confiance, des observations visuelles,
 ```text
 assistant-radiologue-virtuel/
 ├── README.md
-├── docs/          # appel d'offre, architecture, éthique, évaluation
+├── docs/          # appel d'offre, architecture, éthique, évaluation, mini-rapport (V1)
 ├── data/          # cas synthétiques et images jouet
 ├── prompts/       # prompt baseline, prompt amélioré, schéma JSON
 ├── src/           # inférence jouet, garde-fous, métriques, SQLite
@@ -86,7 +86,7 @@ assistant-radiologue-virtuel/
 │   # --- Couche plateforme web (extension, ne fait pas partie du contrat noté) ---
 ├── ai/            # service FastAPI MedGemma (upload → analyse cercle + gravité)
 ├── backend/       # API Django + DRF (auth JWT, historique des analyses)
-└── frontend/      # interface React + TypeScript (landing, login, plateforme)
+└── frontend/      # interface Streamlit (login, upload, résultat, historique, KPI)
 ```
 
 ## Plateforme web (extension)

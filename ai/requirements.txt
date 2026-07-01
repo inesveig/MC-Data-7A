@@ -8,7 +8,7 @@ python-dotenv==1.0.1
 # Traitement d'images médicales
 pydicom==3.0.1
 pylibjpeg==2.0.1
-pylibjpeg-libjpeg==2.1.0
+pylibjpeg-libjpeg==2.3.0
 numpy==2.2.1
 Pillow==11.1.0
 
