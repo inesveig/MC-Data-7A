@@ -80,9 +80,9 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
 
-# Front React (Vite) en dev
+# Front Streamlit en dev (accès navigateur direct au besoin)
 CORS_ALLOWED_ORIGINS = os.getenv(
-    "CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+    "CORS_ALLOWED_ORIGINS", "http://localhost:8501,http://127.0.0.1:8501"
 ).split(",")
 
 # Upload max 25 Mo (radios DICOM)

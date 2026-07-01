@@ -127,5 +127,13 @@ python eval/run_evaluation.py --mode toy \
   --out-dir /tmp/arvi-eval --db-path /tmp/arvi-evidence.sqlite
 ```
 
+Suites de la plateforme (extension) :
+
+```bash
+cd backend && python manage.py test analyses      # 17 tests (mapping, vue, KPI, avis)
+cd ai && AI_MOCK=1 python -m pytest -q             # 26 tests (DICOM/PNG, parsing, API)
+```
+
 État V1 : smoke test **8/8 vert**, évaluation jouet produisant tous les artefacts MUST,
-plateforme web **fonctionnelle de bout en bout** en mode mock.
+plateforme web **fonctionnelle de bout en bout** en mode mock, couverte par **43 tests**
+côté backend + service IA.

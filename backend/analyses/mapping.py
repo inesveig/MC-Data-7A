@@ -22,14 +22,24 @@ DIAG_INCERTAIN = "Incertain"
 DIAGNOSES = (DIAG_SAIN, DIAG_MALADE, DIAG_INCERTAIN)
 
 
+def clamp_severity(value) -> int:
+    """Ramène une gravité potentiellement invalide dans l'entier [0, 10].
+
+    Le service IA n'est pas garanti de renvoyer un entier propre (le VLM peut
+    renvoyer une chaîne, un flottant ou rien). On sécurise donc la conversion
+    au lieu de laisser un `int()` brut faire planter la vue.
+    """
+    try:
+        severity = int(float(value)) if value not in (None, "") else 0
+    except (TypeError, ValueError):
+        severity = 0
+    return max(0, min(10, severity))
+
+
 def derive_diagnosis(analysis: dict) -> tuple[str, float]:
     """(diagnostic 3-classes, confiance 0-1) à partir de l'analyse IA brute."""
     anomaly = bool(analysis.get("anomaly_present"))
-    try:
-        severity = int(analysis.get("severity", 0) or 0)
-    except (TypeError, ValueError):
-        severity = 0
-    severity = max(0, min(10, severity))
+    severity = clamp_severity(analysis.get("severity"))
 
     if not anomaly or severity == 0:
         # Confiance = à quel point on est sûr que c'est sain.

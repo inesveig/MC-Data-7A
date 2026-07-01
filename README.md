@@ -128,6 +128,21 @@ streamlit run app.py   # http://localhost:8501
 Le service IA mappe sa sortie riche (anomalie, gravité 0–10) vers les 3 classes
 **Sain / Malade / Incertain** côté Django (`backend/analyses/mapping.py`).
 
+### Tests de la plateforme
+
+Chaque service a sa propre suite (le service IA est toujours mocké côté backend) :
+
+```bash
+# Backend Django (mapping, garde-fous de la vue, KPI, avis médecin) — 17 tests
+cd backend && source .venv/bin/activate
+python manage.py test analyses
+
+# Service IA (conversion DICOM/PNG, parsing JSON, endpoints) — 26 tests
+cd ai && source .venv/bin/activate
+pip install -r requirements-dev.txt
+AI_MOCK=1 python -m pytest -q
+```
+
 > Cette couche réutilise la logique MedGemma déjà présente dans `src/` et reste,
 > comme le reste du dépôt, **un prototype non clinique**. La localisation par
 > cercle est **approximative** (MedGemma est un VLM, pas un détecteur).

@@ -24,7 +24,13 @@ def dicom_to_image(data: bytes) -> Image.Image:
     l'échelle 8 bits pour que l'image soit lisible par un humain / le modèle.
     """
     import pydicom
-    from pydicom.pixel_data_handlers.util import apply_voi_lut
+
+    # `apply_voi_lut` a migré vers `pydicom.pixels` en pydicom 3.x ; on garde un
+    # repli vers l'ancien chemin pour rester compatible avec pydicom 2.x.
+    try:
+        from pydicom.pixels import apply_voi_lut
+    except ImportError:  # pydicom < 3.0
+        from pydicom.pixel_data_handlers.util import apply_voi_lut
 
     ds = pydicom.dcmread(io.BytesIO(data))
     pixels = ds.pixel_array

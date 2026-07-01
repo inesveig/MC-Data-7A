@@ -16,9 +16,13 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .mapping import concordance, derive_diagnosis
+from .mapping import clamp_severity, concordance, derive_diagnosis
 from .models import Analysis
 from .serializers import AnalysisSerializer
+
+# Extensions de radios acceptées en entrée (DICOM ou images matricielles).
+ALLOWED_EXTENSIONS = (".dcm", ".dicom", ".png", ".jpg", ".jpeg")
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # aligné sur DATA_UPLOAD_MAX_MEMORY_SIZE
 
 
 class AnalyzeView(APIView):
@@ -32,6 +36,20 @@ class AnalyzeView(APIView):
             return Response(
                 {"detail": "Aucun fichier 'file' fourni."},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        name = (upload.name or "").lower()
+        if not name.endswith(ALLOWED_EXTENSIONS):
+            return Response(
+                {
+                    "detail": "Format non supporté. Formats acceptés : "
+                    + ", ".join(ALLOWED_EXTENSIONS)
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if upload.size and upload.size > MAX_UPLOAD_BYTES:
+            return Response(
+                {"detail": "Fichier trop volumineux (max 25 Mo)."},
+                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             )
         analysis_name = (request.data.get("analysis_name") or "").strip()
 
@@ -53,8 +71,14 @@ class AnalyzeView(APIView):
                 status=status.HTTP_502_BAD_GATEWAY,
             )
 
-        payload = ai_resp.json()
-        analysis = payload.get("analysis", {})
+        try:
+            payload = ai_resp.json()
+        except ValueError:
+            return Response(
+                {"detail": "Réponse du service IA illisible (JSON invalide)."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+        analysis = payload.get("analysis") or {}
         diagnosis, confidence = derive_diagnosis(analysis)
 
         record = Analysis(
@@ -64,20 +88,27 @@ class AnalyzeView(APIView):
             diagnosis=diagnosis,
             confidence=confidence,
             anomaly_present=bool(analysis.get("anomaly_present")),
-            severity=int(analysis.get("severity", 0) or 0),
+            severity=clamp_severity(analysis.get("severity")),
             severity_label=analysis.get("severity_label", "none"),
             region=analysis.get("region"),
             result=analysis,
         )
 
         # On stocke le PNG normalisé renvoyé par l'IA (toujours affichable).
+        # Un base64 corrompu ne doit pas faire échouer l'analyse : on ignore
+        # simplement l'image dans ce cas.
         png_b64 = payload.get("image_png_base64")
         if png_b64:
-            record.image.save(
-                f"radio_{upload.name.rsplit('.', 1)[0]}.png",
-                ContentFile(base64.b64decode(png_b64)),
-                save=False,
-            )
+            try:
+                image_bytes = base64.b64decode(png_b64)
+            except (ValueError, TypeError):
+                image_bytes = None
+            if image_bytes:
+                record.image.save(
+                    f"radio_{upload.name.rsplit('.', 1)[0]}.png",
+                    ContentFile(image_bytes),
+                    save=False,
+                )
         record.save()
 
         serialized = AnalysisSerializer(record, context={"request": request}).data
