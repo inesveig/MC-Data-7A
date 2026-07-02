@@ -11,6 +11,7 @@ API_ROOT = os.getenv("DJANGO_API_ROOT", "http://localhost:8000/api")
 TIMEOUT = 300  # l'analyse IA peut être longue (modèle réel)
 
 _CONN_ERR = "Impossible de contacter le serveur Django. Est-il lancé (port 8000) ?"
+SESSION_EXPIRED = "Session expirée, reconnecte-toi."
 
 
 def _headers(token: str) -> dict:
@@ -34,8 +35,6 @@ def analyze(token: str, file_bytes: bytes, filename: str, analysis_name: str):
 
     if resp.status_code == 201:
         return True, resp.json()
-    if resp.status_code == 401:
-        return False, "Session expirée, reconnecte-toi."
     return False, _detail(resp)
 
 
@@ -93,6 +92,8 @@ def delete_analysis(token: str, analysis_id: int):
 
 
 def _detail(resp) -> str:
+    if resp.status_code == 401:
+        return SESSION_EXPIRED
     try:
         return resp.json().get("detail", f"Erreur ({resp.status_code}).")
     except Exception:

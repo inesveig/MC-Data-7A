@@ -70,6 +70,18 @@ if not st.session_state.access_token:
 
 TOKEN = st.session_state.access_token
 
+
+def _handle_session_expiry(message: str) -> bool:
+    """Si le token a expiré, déconnecte proprement et relance l'app. -> True si géré."""
+    if message == api.SESSION_EXPIRED:
+        st.session_state.access_token = None
+        st.session_state.refresh_token = None
+        st.session_state.user = None
+        st.warning("⏱️ Session expirée, reconnecte-toi.")
+        st.rerun()
+        return True
+    return False
+
 # BARRE LATÉRALE — compte connecté + déconnexion
 with st.sidebar:
     username_affiche = st.session_state.user.get("username") if st.session_state.user else "Utilisateur"
@@ -96,7 +108,7 @@ st.error(
 @st.cache_data(ttl=5, show_spinner=False)
 def _load_history(token: str):
     ok, rows = api.list_analyses(token)
-    return rows if ok else None
+    return (rows, None) if ok else (None, rows)
 
 
 tab_diag, tab_hist, tab_avis, tab_kpi = st.tabs(
@@ -143,7 +155,8 @@ with tab_diag:
                     )
 
                 if not ok:
-                    st.error(data)
+                    if not _handle_session_expiry(data):
+                        st.error(data)
                 else:
                     _load_history.clear()
                     diagnosis = data.get("diagnosis", "Incertain")
@@ -188,10 +201,11 @@ with tab_diag:
 # ---------------------------------------------------------------- TAB 2
 with tab_hist:
     st.subheader("Historique des diagnostics")
-    all_rows = _load_history(TOKEN)
+    all_rows, hist_error = _load_history(TOKEN)
 
     if all_rows is None:
-        st.error("Impossible de charger l'historique depuis Django.")
+        if not _handle_session_expiry(hist_error):
+            st.error(hist_error or "Impossible de charger l'historique depuis Django.")
         all_rows = []
 
     col_search, col_filter, col_export = st.columns([2, 1, 1])
@@ -274,10 +288,12 @@ with tab_hist:
                         st.warning("Confirmer la suppression ?")
                         cc1, cc2 = st.columns(2)
                         if cc1.button("✅ Oui", key=f"yes_{diag_id}", use_container_width=True):
-                            ok, _ = api.delete_analysis(TOKEN, diag_id)
+                            ok, del_err = api.delete_analysis(TOKEN, diag_id)
                             st.session_state.confirm_delete_id = None
                             if ok:
                                 _load_history.clear()
+                            elif not _handle_session_expiry(del_err):
+                                st.error(del_err)
                             st.rerun()
                         if cc2.button("❌ Non", key=f"no_{diag_id}", use_container_width=True):
                             st.session_state.confirm_delete_id = None
@@ -294,7 +310,10 @@ with tab_avis:
         "Compare le diagnostic de l'IA à l'avis réel d'un professionnel de santé "
         "pour suivre la fiabilité du modèle dans le temps."
     )
-    rows = _load_history(TOKEN) or []
+    rows, avis_error = _load_history(TOKEN)
+    rows = rows or []
+    if avis_error and _handle_session_expiry(avis_error):
+        st.stop()
 
     if not rows:
         st.info("Aucune analyse enregistrée pour le moment.")
@@ -353,7 +372,7 @@ with tab_avis:
                         _load_history.clear()
                         st.success("Avis médical enregistré ! Retrouve la comparaison dans l'Historique.")
                         st.rerun()
-                    else:
+                    elif not _handle_session_expiry(res):
                         st.error(res)
 
 # ---------------------------------------------------------------- TAB 4
@@ -361,7 +380,8 @@ with tab_kpi:
     st.subheader("📊 Indicateurs clés")
     ok, stats = api.get_stats(TOKEN)
     if not ok:
-        st.error(stats)
+        if not _handle_session_expiry(stats):
+            st.error(stats)
         st.stop()
 
     c1, c2, c3, c4 = st.columns(4)
