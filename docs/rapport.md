@@ -179,7 +179,7 @@ Une plateforme démontre la chaîne en interactif — vérifiée de bout en bout
 
 ```bash
 pip install -r requirements-test.txt
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q      # 8 passed
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q      # 12 passed
 python -m compileall -q src api app eval finetuning tests
 python eval/run_evaluation.py --mode toy \
   --out-dir /tmp/arvi-eval --db-path /tmp/arvi-evidence.sqlite
@@ -201,7 +201,7 @@ python eval/build_error_register.py --predictions eval/rsna_real_eval/baseline_p
   --out /tmp/register.csv
 ```
 
-État V1 : smoke test **8/8 vert**, évaluation jouet produisant tous les artefacts MUST,
+État V1 : smoke test **12/12 vert**, évaluation jouet produisant tous les artefacts MUST,
 **évaluation RSNA réelle faite** (24 cas, accuracy 0.625, registre d'erreurs commenté),
-plateforme web **fonctionnelle de bout en bout** en mode mock, couverte par **66 tests**
+plateforme web **fonctionnelle de bout en bout** en mode mock, couverte par **70 tests**
 (pipeline + backend + service IA).
