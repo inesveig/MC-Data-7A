@@ -77,17 +77,67 @@ Matrice de confusion (baseline) : diagonale parfaite (10/10 par classe).
 > **Lecture honnête.** Ces scores parfaits sont **attendus** et **sans valeur
 > médicale** : le jeu synthétique est construit pour être séparable et sert seulement à
 > prouver que la chaîne logicielle (chargement → JSON → warning → métriques → logs)
-> fonctionne de bout en bout. La comparaison baseline/improved est neutre sur ce jeu
-> trivial ; elle prendra son sens sur un sous-ensemble RSNA annoté (étape suivante).
+> fonctionne de bout en bout. La mesure qui compte est celle sur RSNA réel ci-dessous.
+
+### 5bis. Résultats mesurés (RSNA réel, n = 24, mode baseline)
+
+Sous-échantillon équilibré (8 cas/classe) tiré de `data/rsna_index.csv` (labels
+officiels du RSNA Pneumonia Detection Challenge), inférence **réelle** MedGemma-4b
+(`AI_MOCK=0`, pas de mock) sur DICOM avec fenêtrage VOI LUT
+(`src/preprocessing.py::_dicom_to_image`). Reproduction :
+
+```bash
+python eval/run_batch.py --cases data/rsna_eval_cases.csv --mode baseline \
+  --db-path /tmp/eval.sqlite --out /tmp/baseline_real.jsonl
+```
+
+| Mode | n | Accuracy | Macro-F1 | JSON valide | Warning | Taux incertitude |
+|---|---|---|---|---|---|---|
+| baseline | 24 | **0.625** | **0.57** | 100 % | 100 % | 8 % |
+
+Matrice de confusion (`eval/rsna_real_eval/baseline_confusion.json`) :
+
+|  | pred normal | pred suspected_opacity | pred uncertain |
+|---|---|---|---|
+| **normal** (n=8) | 7 | 1 | 0 |
+| **suspected_opacity** (n=8) | 0 | 7 | 1 |
+| **uncertain** (n=8) | 1 | 6 | 1 |
+
+> **Lecture honnête.** Contrairement au jeu synthétique, ces scores sont **imparfaits
+> et attendus comme tels** : c'est la première mesure crédible du projet, encore sans
+> valeur clinique (prototype pédagogique) mais représentative du comportement réel du
+> modèle. Le point marquant : la classe `uncertain` de RSNA (cas ambigus même pour
+> l'annotateur humain) est presque systématiquement classée `suspected_opacity` (6/8)
+> — le modèle sur-affirme là où l'attendu est l'abstention. Le taux d'incertitude du
+> modèle (8 %) est bien plus bas que le taux réel de cas ambigus (33 % dans RSNA),
+> signe que le prompt actuel n'est pas assez conservateur. Comparaison avec le prompt
+> `improved` non refaite sur ce sous-échantillon (coût de calcul local trop élevé,
+> voir §8).
 
 ## 6. Analyse d'erreurs (taxonomie)
 
 La taxonomie est en place (`eval/error_register_template.csv`,
 `eval/build_error_register.py`) : `FN` faux négatif, `FP` faux positif, `UA` incertitude
 acceptable, `JF` erreur de format JSON, `HT` hallucination textuelle. Sur le jeu
-synthétique, aucun cas n'est déclenché (jeu séparable). Le registre est destiné à être
-rempli manuellement sur un échantillon RSNA `final` de 20 à 30 cas commentés pour la
-soutenance — en montrant explicitement les échecs, pas seulement les réussites.
+synthétique, aucun cas n'est déclenché (jeu séparable).
+
+**Registre rempli sur les 24 cas RSNA réels**
+(`eval/rsna_real_eval/baseline_error_register.csv`) : 15 `OK`, 7 `FP`, 1 `FN`, 1 `UA`,
+0 `JF`. Aucune hallucination textuelle franche (`HT`) repérée sur cette relecture — les
+justifications restent descriptives et cohérentes avec des motifs radiologiques
+plausibles, mais une revue par un vrai radiologue serait nécessaire pour trancher
+définitivement (hors périmètre du prototype). Deux enseignements qualitatifs :
+
+- **7 FP à confiance moyenne (0.3–0.6) sur des cas `uncertain`** : le modèle décrit des
+  opacités avec un langage hésitant (« could be suggestive of », « not definitive »)
+  mais ne bascule pas vers `uncertain` malgré une confiance déjà basse — le seuil de
+  confiance du garde-fou (< 0.6) n'est pas assez strict pour ce comportement.
+- **1 FN à haute sévérité** (`bbe95fb0…`) : confiance 0.95 sur `normal` alors que le
+  modèle mentionne lui-même la présence probable de tubes/lignes (patient intubé)
+  pouvant masquer une anomalie — sur-confiance sur un facteur de confusion qu'il a
+  pourtant identifié. Cas à surveiller en priorité si le projet évolue.
+
+Le détail cas par cas (justification MedGemma incluse) est dans le registre CSV.
 
 ## 7. Extension : plateforme web (hors contrat noté)
 
@@ -109,11 +159,19 @@ Une plateforme démontre la chaîne en interactif — vérifiée de bout en bout
 
 ## 8. Limites et suite
 
-- Résultats mesurés uniquement sur données synthétiques → **aucune conclusion
-  clinique**. Prochaine étape : évaluer sur un sous-ensemble RSNA réel annoté.
-- Pas de calibration de probabilité : la « confiance » est dérivée heuristiquement de
-  la gravité.
-- Comparaison baseline/improved à re-mesurer sur un jeu non trivial.
+- Évaluation RSNA réelle faite sur **24 cas** (§5bis), pas 20-30 sur les trois modes :
+  taille limitée par le temps de calcul en local (Mac, pas de GPU dédié — chaque
+  inférence prend ~35-70s, un process isolé par image pour éviter la saturation
+  mémoire). Élargir l'échantillon nécessiterait un GPU cloud (Colab/AWS).
+- Comparaison baseline/improved **non refaite sur RSNA réel** : le mode `improved`
+  doublerait le temps de calcul (48 inférences) ; seule la comparaison sur jeu
+  synthétique (neutre, voir §5) est disponible pour l'instant.
+- Pas de calibration de probabilité : la « confiance » vient directement du JSON
+  produit par le modèle (baseline) ou est dérivée heuristiquement de la gravité
+  (plateforme web) — dans les deux cas, ce n'est pas une probabilité calibrée.
+- Registre d'erreurs rempli automatiquement (FN/FP/UA/JF) + commentaires qualitatifs
+  rédigés à partir des justifications du modèle, mais **pas de relecture par un
+  radiologue** pour confirmer les codes `HT` (hors périmètre du prototype).
 - **COULD** non traité : détection de bounding boxes (mAP/IoU), Grad-CAM, LoRA/QLoRA
   (stubs présents dans `finetuning/`).
 
@@ -130,10 +188,20 @@ python eval/run_evaluation.py --mode toy \
 Suites de la plateforme (extension) :
 
 ```bash
-cd backend && python manage.py test analyses      # 17 tests (mapping, vue, KPI, avis)
-cd ai && AI_MOCK=1 python -m pytest -q             # 26 tests (DICOM/PNG, parsing, API)
+cd backend && python manage.py test analyses accounts   # 24 tests (mapping, vue, KPI, avis, compte)
+cd ai && AI_MOCK=1 python -m pytest -q                   # 31 tests (DICOM/PNG, parsing, API)
+```
+
+Éval RSNA réelle (§5bis, artefacts dans `eval/rsna_real_eval/`) :
+
+```bash
+python eval/run_batch.py --cases data/rsna_eval_cases.csv --mode baseline \
+  --db-path /tmp/eval.sqlite --out /tmp/baseline_real.jsonl
+python eval/build_error_register.py --predictions eval/rsna_real_eval/baseline_predictions.csv \
+  --out /tmp/register.csv
 ```
 
 État V1 : smoke test **8/8 vert**, évaluation jouet produisant tous les artefacts MUST,
-plateforme web **fonctionnelle de bout en bout** en mode mock, couverte par **43 tests**
-côté backend + service IA.
+**évaluation RSNA réelle faite** (24 cas, accuracy 0.625, registre d'erreurs commenté),
+plateforme web **fonctionnelle de bout en bout** en mode mock, couverte par **63 tests**
+(pipeline + backend + service IA).

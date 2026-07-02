@@ -1,0 +1,9 @@
+{
+  "uncertain__suspected_opacity": 6,
+  "suspected_opacity__suspected_opacity": 7,
+  "normal__normal": 7,
+  "uncertain__normal": 1,
+  "uncertain__uncertain": 1,
+  "suspected_opacity__uncertain": 1,
+  "normal__suspected_opacity": 1
+}

@@ -1,0 +1,25 @@
+case_id,ground_truth,prediction,confidence,error_type,severity,comment,corrective_action
+d92fc569-fe84-49e4-bfc0-b35891d0e7a7,uncertain,suspected_opacity,0.6,FP,medium,"Modèle confiant (0.6) sur une ""large opacité"" obscurcissant l'hémidiaphragme droit ; le label RSNA est uncertain (cas ambigu même pour l'annotateur humain). Le modèle a tranché là où l'attendu était l'abstention.",should have abstained on limited evidence
+fc15525b-c4e0-4673-af74-955525e1b99a,uncertain,suspected_opacity,0.3,FP,medium,"Confiance faible (0.3) et formulation prudente (""could be suggestive of"") mais classé quand même suspected_opacity au lieu de basculer en uncertain : le seuil de confiance n'a pas suffi à déclencher le garde-fou.",should have abstained on limited evidence
+c7024796-39ed-4eda-906d-65a1fb5d5c52,suspected_opacity,suspected_opacity,0.6,OK,none,correct,keep
+bcab0525-079e-492e-8e20-c51c779884aa,suspected_opacity,suspected_opacity,0.5,OK,none,correct,keep
+d561ede1-9992-4d20-a935-53a32a8c05d1,suspected_opacity,suspected_opacity,0.5,OK,none,correct,keep
+63a3624b-b2be-4681-87fb-e545315a4a0f,uncertain,suspected_opacity,0.6,FP,medium,Opacités bilatérales hazy avec plusieurs diagnostics différentiels possibles (pneumonie/œdème) sans trancher clairement — cas typiquement uncertain mal classé.,should have abstained on limited evidence
+d11f1b9d-5015-4e99-bb94-c714de18b765,normal,normal,0.95,OK,none,correct,keep
+e1bcfa18-5fed-4a92-85fb-14438a17719b,normal,normal,0.95,OK,none,correct,keep
+cfe768fc-4a0c-41fb-b3e3-86229e2cb94a,suspected_opacity,suspected_opacity,0.6,OK,none,correct,keep
+f888c6c9-2c96-484d-b16f-bd7495288635,uncertain,suspected_opacity,0.6,FP,medium,"Consolidation ""possible"" au champ pulmonaire droit, justification hésitante (""could be due to"") mais confiance affichée 0.6 malgré tout.",should have abstained on limited evidence
+d9a51572-0117-427c-ade2-331f6bd68721,uncertain,suspected_opacity,0.6,FP,medium,"Infiltrats bilatéraux diffus décrits, cohérents avec une vraie anomalie visuelle mais le label RSNA reste uncertain — désaccord modèle/annotateur plausible plutôt qu'erreur nette.",should have abstained on limited evidence
+b678dfde-85c1-464f-936f-de965a7f5fe9,normal,normal,0.95,OK,none,correct,keep
+bbe95fb0-eb81-478e-b446-1053b0ae0f1b,uncertain,normal,0.95,FN,high,"Cas le plus préoccupant du lot : confiance très élevée (0.95) sur ""normal"" alors que le modèle note lui-même la présence probable de tubes/lignes (patient intubé) pouvant masquer une anomalie aux bases pulmonaires. Sur-confiance sur un facteur de confusion identifié mais ignoré dans la décision finale.",should have abstained on limited evidence
+a0923c73-57fa-4fcf-8284-5c77abafb036,uncertain,suspected_opacity,0.4,FP,medium,Opacité hazy au champ pulmonaire gauche avec confiance déjà faible (0.4) mais pas basculée en uncertain.,should have abstained on limited evidence
+50691612-2d64-4d61-8d67-bba6836392ce,uncertain,uncertain,0.2,OK,none,correct,keep
+03d92597-3e33-4fdf-8db5-a27cf5b8d3eb,suspected_opacity,suspected_opacity,0.6,OK,none,correct,keep
+3f2b878e-9e3b-410b-a739-b43d81b98692,suspected_opacity,uncertain,0.3,UA,low,"Image de qualité limitée (tubes/lignes multiples gênant la lecture) correctement basculée en uncertain par le garde-fou (image_quality=limited + confiance<0.6) — comportement voulu, même si le label réel était suspected_opacity.",keep uncertainty rule
+e6957865-bb93-4b28-83c4-80e8a7eea793,normal,normal,0.95,OK,none,correct,keep
+46cfe8ef-549c-4b26-95b9-3a0b2cea22d5,normal,normal,0.95,OK,none,correct,keep
+62e7f210-65e0-40e1-ba52-8c21b6e767e9,suspected_opacity,suspected_opacity,0.6,OK,none,correct,keep
+f1c18d3e-a250-451d-8ed6-47b85a28bfd3,suspected_opacity,suspected_opacity,0.6,OK,none,correct,keep
+12657240-8b00-4be5-994e-6bba758e168a,normal,normal,0.95,OK,none,correct,keep
+bc83e722-804e-498f-9efb-7bc329a1327f,normal,normal,0.95,OK,none,correct,keep
+3c6afc4b-f292-4064-ae8b-06d3439d1d27,normal,suspected_opacity,0.6,FP,medium,"Le modèle qualifie lui-même l'opacité de ""not definitive"" dans sa justification mais classe quand même suspected_opacity — sur-classification (overcall) sur une image jugée normale par l'annotateur RSNA officiel.",improve specificity (overcall)
