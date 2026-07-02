@@ -133,7 +133,7 @@ Le service IA mappe sa sortie riche (anomalie, gravité 0–10) vers les 3 class
 Chaque service a sa propre suite (le service IA est toujours mocké côté backend) :
 
 ```bash
-# Backend Django (mapping, garde-fous de la vue, KPI, avis médecin, compte) — 24 tests
+# Backend Django (mapping, garde-fous de la vue, KPI, avis médecin, compte) — 27 tests
 cd backend && source .venv/bin/activate
 python manage.py test accounts analyses
 

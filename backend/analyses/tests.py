@@ -156,6 +156,38 @@ class AnalyzeViewTests(APITestCase):
         resp = self.client.post(self.url, {"file": self._png()}, format="multipart")
         self.assertEqual(resp.status_code, status.HTTP_502_BAD_GATEWAY)
 
+    def test_fichier_trop_volumineux_renvoie_413(self):
+        self._login()
+        gros_fichier = SimpleUploadedFile(
+            "radio.png", b"x" * (26 * 1024 * 1024), content_type="image/png"
+        )
+        resp = self.client.post(self.url, {"file": gros_fichier}, format="multipart")
+        self.assertEqual(resp.status_code, status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
+        self.assertEqual(Analysis.objects.filter(user=self.user).count(), 0)
+
+    @patch("analyses.views.requests.post")
+    def test_service_ia_repond_erreur_http_renvoie_502(self, mock_post):
+        mock_post.return_value = _fake_ai_response(status_code=500)
+        self._login()
+        resp = self.client.post(self.url, {"file": self._png()}, format="multipart")
+        self.assertEqual(resp.status_code, status.HTTP_502_BAD_GATEWAY)
+        self.assertEqual(Analysis.objects.filter(user=self.user).count(), 0)
+
+    @patch("analyses.views.requests.post")
+    def test_service_ia_repond_json_invalide_renvoie_502(self, mock_post):
+        class _BadJsonResp:
+            status_code = 200
+            text = "not json"
+
+            def json(self):
+                raise ValueError("invalid json")
+
+        mock_post.return_value = _BadJsonResp()
+        self._login()
+        resp = self.client.post(self.url, {"file": self._png()}, format="multipart")
+        self.assertEqual(resp.status_code, status.HTTP_502_BAD_GATEWAY)
+        self.assertEqual(Analysis.objects.filter(user=self.user).count(), 0)
+
 
 # --------------------------------------------------------------------------- #
 # KPI et avis médecin

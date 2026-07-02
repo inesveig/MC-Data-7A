@@ -188,7 +188,7 @@ python eval/run_evaluation.py --mode toy \
 Suites de la plateforme (extension) :
 
 ```bash
-cd backend && python manage.py test analyses accounts   # 24 tests (mapping, vue, KPI, avis, compte)
+cd backend && python manage.py test analyses accounts   # 27 tests (mapping, vue, KPI, avis, compte)
 cd ai && AI_MOCK=1 python -m pytest -q                   # 31 tests (DICOM/PNG, parsing, API)
 ```
 
@@ -203,5 +203,5 @@ python eval/build_error_register.py --predictions eval/rsna_real_eval/baseline_p
 
 État V1 : smoke test **8/8 vert**, évaluation jouet produisant tous les artefacts MUST,
 **évaluation RSNA réelle faite** (24 cas, accuracy 0.625, registre d'erreurs commenté),
-plateforme web **fonctionnelle de bout en bout** en mode mock, couverte par **63 tests**
+plateforme web **fonctionnelle de bout en bout** en mode mock, couverte par **66 tests**
 (pipeline + backend + service IA).
